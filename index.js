@@ -199,7 +199,7 @@ app.get("/loadghe", function(req, res) {
   let suatchieu = req.query.suatchieu;
   let ngaydathientai = req.query.ngaydathientai;
 
-  let sqlquery = `SELECT ghe.ID, phim.TenPhim, ghe.TenGhe, ghe_phong.TrangThai FROM ghe JOIN ghe_phong ON ghe.ID = ghe_phong.ID_Ghe JOIN phong ON phong.ID = ghe_phong.ID_Phong JOIN phong_rap ON phong_rap.ID_Phong = phong.ID JOIN rapphim ON rapphim.ID = phong_rap.ID_Rap JOIN phim_phong_xuat ON phim_phong_xuat.ID_Phong = phong.ID JOIN phim ON phim.ID = phim_phong_xuat.ID_Phim JOIN suatchieu ON suatchieu.ID = phim_phong_xuat.ID_XuatChieu JOIN lichchieu ON lichchieu.ID_Rap = rapphim.ID WHERE phim.ID = ${idphim} AND suatchieu.Gio = '${suatchieu}' AND rapphim.ID = ${rapphim} AND ghe_phong.NgayDat ='${ngaydathientai}'`;
+  let sqlquery = `SELECT ghe.ID, phim.TenPhim, ghe.TenGhe, ghe_phong.TrangThai FROM ghe JOIN ghe_phong ON ghe.ID = ghe_phong.ID_Ghe JOIN phong ON phong.ID = ghe_phong.ID_Phong JOIN phong_rap ON phong_rap.ID_Phong = phong.ID JOIN rapphim ON rapphim.ID = phong_rap.ID_Rap JOIN phim_phong_xuat ON phim_phong_xuat.ID_Phong = phong.ID JOIN phim ON phim.ID = phim_phong_xuat.ID_Phim JOIN suatchieu ON suatchieu.ID = phim_phong_xuat.ID_XuatChieu JOIN lichchieu ON lichchieu.ID_Rap = rapphim.ID WHERE phim.ID = ${idphim} AND suatchieu.Gio = '${suatchieu}' AND rapphim.ID = ${rapphim} AND ghe_phong.NgayDat ='${ngaydathientai}' AND lichchieu.Ngay = '${ngaydathientai}'`;
 
   conn.query(sqlquery, function(err, result) {
     if (err) {
