@@ -151,15 +151,30 @@ app.get("/datvephim", function(req, res) {
   let idrap = req.query.idrap;
   let idhoadon = req.query.idhoadon;
   let status = req.query.status;
+  let idphong = req.query.idphong;
 
-  let sqlquery = `INSERT INTO vedat VALUES (NULL, '${ngaydat}', '${idsuat}', '${idghe}', '${idphim}', '${idkhachhang}', '${idrap}', '${idhoadon}', '${status}')`;
+
+  let sqlqueryhoadon = `INSERT INTO hoadon  VALUES (NULL, '${ngaydat}', '45000', '${idkhachhang}', 'Chưa thanh toán');`;
+  let sqlquery = `INSERT INTO vedat VALUES (NULL, '${ngaydat}', '${idsuat}', '${idghe}', '${idphim}', '${idkhachhang}', '${idrap}', '${idhoadon}', '${status}', '${idphong}')`;
+  let sqlqueryghephong = `INSERT INTO ghe_phong VALUES ('${idghe}', '${idphong}','${status}' ,'${ngaydat}')`;
+  conn.query(sqlqueryhoadon, function(err, result){
+    if(err){
+      console.log(err);
+    }
+  })
 
   conn.query(sqlquery, function(err, result) {
     if (err) {
-      res.send(err);
+     console.log(err);
     } else {
       res.send("Đặt vé thành công!");
     }
+  });
+
+  conn.query(sqlqueryghephong, function(err,result){
+      if(err){
+        console.log(err);
+      }
   });
 });
 
@@ -180,8 +195,8 @@ app.get("/loadxuatchieu", function(req, res) {
 
 app.get("/loadve", function(req, res) {
   let iduser = req.query.iduser;
-  let sqlquery = `SELECT rapphim.DiaChi, phim.Hinh, phim.ThoiGian, vedat.ID, phong.TenPhong, rapphim.TenRap, phim.TenPhim , vedat.NgayDat, ghe.TenGhe, suatchieu.Gio
-  FROM vedat JOIN phim ON phim.ID = vedat.ID_Phim JOIN suatchieu ON suatchieu.ID = vedat.ID_Suat JOIN ghe on ghe.ID = vedat.ID_Ghe JOIN khachhang ON khachhang.ID = vedat.ID_KhachHang JOIN  rapphim ON rapphim.ID = vedat.ID_Rap JOIN phim_phong_xuat ON phim_phong_xuat.ID_XuatChieu = suatchieu.ID JOIN phong ON phim_phong_xuat.ID_Phong = phong.ID
+  let sqlquery = `SELECT phong.TenPhong, vedat.Status, rapphim.DiaChi, phim.Hinh, phim.ThoiGian, vedat.ID, rapphim.TenRap, phim.TenPhim , DATE_FORMAT(vedat.NgayDat, '%d/%m/%Y') as NgayDat, ghe.TenGhe, suatchieu.Gio
+  FROM vedat JOIN phim ON phim.ID = vedat.ID_Phim JOIN suatchieu ON suatchieu.ID = vedat.ID_Suat JOIN ghe on ghe.ID = vedat.ID_Ghe JOIN khachhang ON khachhang.ID = vedat.ID_KhachHang JOIN  rapphim ON rapphim.ID = vedat.ID_Rap JOIN phong ON phong.ID = vedat.ID_Phong
   WHERE vedat.Status = N'Đã đặt' AND khachhang.ID = ${iduser}`;
 
   conn.query(sqlquery, function(err, result) {
@@ -199,7 +214,7 @@ app.get("/loadghe", function(req, res) {
   let suatchieu = req.query.suatchieu;
   let ngaydathientai = req.query.ngaydathientai;
 
-  let sqlquery = `SELECT ghe.ID, phim.TenPhim, ghe.TenGhe, ghe_phong.TrangThai FROM ghe JOIN ghe_phong ON ghe.ID = ghe_phong.ID_Ghe JOIN phong ON phong.ID = ghe_phong.ID_Phong JOIN phong_rap ON phong_rap.ID_Phong = phong.ID JOIN rapphim ON rapphim.ID = phong_rap.ID_Rap JOIN phim_phong_xuat ON phim_phong_xuat.ID_Phong = phong.ID JOIN phim ON phim.ID = phim_phong_xuat.ID_Phim JOIN suatchieu ON suatchieu.ID = phim_phong_xuat.ID_XuatChieu JOIN lichchieu ON lichchieu.ID_Rap = rapphim.ID WHERE phim.ID = ${idphim} AND suatchieu.Gio = '${suatchieu}' AND rapphim.ID = ${rapphim} AND ghe_phong.NgayDat ='${ngaydathientai}' AND lichchieu.Ngay = '${ngaydathientai}'`;
+  let sqlquery = `SELECT ghe.ID, phim.TenPhim, ghe.TenGhe, ghe_phong.TrangThai FROM ghe JOIN ghe_phong ON ghe.ID = ghe_phong.ID_Ghe JOIN phong ON phong.ID = ghe_phong.ID_Phong JOIN suatchieu ON suatchieu.ID = ghe_phong.ID_suatchieu JOIN phong_rap ON phong_rap.ID_Phong = phong.ID JOIN rapphim ON rapphim.ID = phong_rap.ID_Rap JOIN phim_phong_xuat ON phim_phong_xuat.ID_XuatChieu = suatchieu.ID JOIN phim ON phim.ID = phim_phong_xuat.ID_Phim JOIN lichchieu ON lichchieu.ID_Rap = rapphim.ID WHERE phim.ID = ${idphim} AND suatchieu.Gio = '${suatchieu}' AND rapphim.ID = ${rapphim} AND ghe_phong.NgayDat ='${ngaydathientai}' AND lichchieu.Ngay = '${ngaydathientai}'`;
 
   conn.query(sqlquery, function(err, result) {
     if (err) {
