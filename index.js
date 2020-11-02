@@ -25,10 +25,6 @@ app.get("/", function(req, res) {
   });
 });
 
-app.get("/search", function(req, res) {
-  console.log(req.query.id);
-});
-
 app.post("/login", function(req, res) {
   let sqlquery = `SELECT khachhang.ID, khachhang.HoTen, khachhang.Email,DATE_FORMAT(khachhang.NgaySinh, '%d/%m/%Y') as NgaySinh, khachhang.SDT,khachhang.Account, khachhang.Password FROM khachhang WHERE Account = '${req
     .body.account}' AND Password = '${req.body.password}'`;
