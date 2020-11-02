@@ -3,6 +3,8 @@ const mysql = require("mysql");
 const bodyParser = require("body-parser");
 
 const app = express();
+app.listen(process.env.PORT || 3000);
+
 
 app.use(express.json()); // for parsing application/json
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencode
@@ -17,13 +19,12 @@ const conn = mysql.createConnection({
   port: 3306,
 });
 
-app.listen(process.env.PORT || 3000);
 
-// app.get("/", function(req, res) {
-//   conn.query("SELECT * FROM ghe", function(err, result) {
-//     res.json(result);
-//   });
-// });
+app.get("/", function(req, res) {
+  conn.query("SELECT * FROM ghe", function(err, result) {
+    res.json(result);
+  });
+});
 
 app.get("/search", function(req, res) {
   console.log(req.query.id);
