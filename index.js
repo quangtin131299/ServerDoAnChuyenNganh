@@ -2,7 +2,6 @@ const express = require("express");
 const mysql = require("mysql");
 const bodyParser = require("body-parser");
 
-const route = express.Router();
 const app = express();
 
 app.use(express.json()); // for parsing application/json
