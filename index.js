@@ -101,7 +101,7 @@ app.get("/loadphimdangchieu", function(req, res) {
 
   conn.query(sqlquery, function(err, result) {
     if (err) {
-      res.send(err);
+      console.log(err);
     } else {
       res.json(result);
     }
@@ -112,7 +112,7 @@ app.get("/loadphimsapchieu", function(req, res) {
   let sqlquery = `SELECT  phim.ID, phim.TenPhim, phim.ThoiGian ,phim.Hinh, phim.TrangThai from phim WHERE phim.TrangThai = N'Sắp chiếu'`;
   conn.query(sqlquery, function(err, result) {
     if (err) {
-      res.send(err);
+      console.log(err);
     } else {
       res.json(result);
     }
@@ -123,7 +123,7 @@ app.get("/loadrapphim", function(req, res) {
   let sqlquery = `SELECT rapphim.ID, rapphim.TenRap, rapphim.Hinh, rapphim.DiaChi from rapphim`;
   conn.query(sqlquery, function(err, result) {
     if (err) {
-      res.send(err);
+      console.log(err);
     } else {
       res.json(result);
     }
@@ -149,33 +149,40 @@ app.get("/datvephim", function(req, res) {
   let idphim = req.query.idphim;
   let idkhachhang = req.query.idkhachhang;
   let idrap = req.query.idrap;
-  let idhoadon = req.query.idhoadon;
   let status = req.query.status;
   let idphong = req.query.idphong;
 
 
   let sqlqueryhoadon = `INSERT INTO hoadon  VALUES (NULL, '${ngaydat}', '45000', '${idkhachhang}', 'Chưa thanh toán');`;
-  let sqlquery = `INSERT INTO vedat VALUES (NULL, '${ngaydat}', '${idsuat}', '${idghe}', '${idphim}', '${idkhachhang}', '${idrap}', '${idhoadon}', '${status}', '${idphong}')`;
-  let sqlqueryghephong = `INSERT INTO ghe_phong VALUES ('${idghe}', '${idphong}','${idsuat}','${status}' ,'${ngaydat}')`;
+  
   conn.query(sqlqueryhoadon, function(err, result){
     if(err){
       console.log(err);
+    }else{
+      let sqllastrowhoadon = `SELECT * FROM hoadon ORDER BY hoadon.ID DESC LIMIT 1`;
+      conn.query(sqllastrowhoadon, function(err, result){
+        let idhoadon = result[0].ID;
+        let sqlquery = `INSERT INTO vedat VALUES (NULL, '${ngaydat}', '${idsuat}', '${idghe}', '${idphim}', '${idkhachhang}', '${idrap}', '${idhoadon}', '${status}', '${idphong}')`;
+        conn.query(sqlquery, function(err, result) {
+          if (err) {
+           console.log(err);
+          } else {
+            res.send("Đặt vé thành công!");
+          }
+        });
+        
+        let sqlqueryghephong = `INSERT INTO ghe_phong VALUES ('${idghe}', '${idphong}','${idsuat}','${status}' ,'${ngaydat}')`;
+        conn.query(sqlqueryghephong, function(err,result){
+            if(err){
+              console.log(err);
+            }
+        });
+      })
+    
     }
   })
 
-  conn.query(sqlquery, function(err, result) {
-    if (err) {
-     console.log(err);
-    } else {
-      res.send("Đặt vé thành công!");
-    }
-  });
 
-  conn.query(sqlqueryghephong, function(err,result){
-      if(err){
-        console.log(err);
-      }
-  });
 });
 
 app.get("/loadxuatchieu", function(req, res) {
@@ -257,5 +264,6 @@ app.post("/capnhatthongtinkhach", function(req, res) {
     }
   });
 });
+
 
 // GET, POST -> sử dụng query
