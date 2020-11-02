@@ -66,7 +66,7 @@ app.post("/register", function(req, res) {
 
 app.get("/loadchitietphim", function(req, res) {
   if (Number(req.query.idmovie) != -1) {
-    let sqlquery = `SELECT phim.ID, phim.TenPhim, phim.Hinh, phim.ThoiGian, loaiphim.TenLoai, phim_loaiphim.MoTa, phim_loaiphim.NgayKhoiChieu from phim JOIN phim_loaiphim ON phim.ID = phim_loaiphim.ID_Phim JOIN loaiphim ON loaiphim.ID = phim_loaiphim.ID_Loai WHERE phim.ID = ${req
+    let sqlquery = `SELECT phim.ID, phim.TenPhim, phim.Trailer,phim.Hinh, phim.ThoiGian, loaiphim.TenLoai, phim_loaiphim.MoTa, phim_loaiphim.NgayKhoiChieu from phim JOIN phim_loaiphim ON phim.ID = phim_loaiphim.ID_Phim JOIN loaiphim ON loaiphim.ID = phim_loaiphim.ID_Loai WHERE phim.ID = ${req
       .query.idmovie} AND phim.TrangThai = N'đang chiếu'`;
 
     conn.query(sqlquery, function(err, result) {
