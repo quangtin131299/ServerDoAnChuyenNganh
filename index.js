@@ -3,7 +3,6 @@ const mysql = require("mysql");
 const bodyParser = require("body-parser");
 const app = express();
 const groupBy = require("json-groupby");
-const { json } = require("express");
 
 app.listen(process.env.PORT || 3000);
 
@@ -454,13 +453,13 @@ app.post("/insertnewcinemaadmin", function(req, res) {
 app.get("/timkiemcinemaadmin", function(req, res) {
   let tencinema = req.query.tencinema;
   let sqlquery = `SELECT * FROM rapphim WHERE rapphim.TenRap LIKE '%${tencinema}%'`;
-  conn.query(sqlquery, function(err,result){
-    if(err){
+  conn.query(sqlquery, function(err, result) {
+    if (err) {
       res.send(err);
-    }else{
+    } else {
       res.json(result);
     }
-  })
+  });
 });
 //Ticker
 app.get("/loadtickeradmin", function(req, res) {
@@ -473,6 +472,112 @@ app.get("/loadtickeradmin", function(req, res) {
     }
   });
 });
+//Lich chieu
+app.get("/loadlichchieuadmin", function(req, res) {
+  let sqlquery = `SELECT lichchieu.ID, DATE_FORMAT(lichchieu.Ngay, '%d/%m/%Y') as 'Ngay', rapphim.ID as 'IDRapPhim', rapphim.TenRap FROM lichchieu JOIN rapphim ON lichchieu.ID_Rap = rapphim.ID`;
+  conn.query(sqlquery, function(err, result) {
+    if (err) {
+      res.send(err);
+    } else {
+      res.json(result);
+    }
+  });
+});
+app.get("/loadchitietlichchieuadmin", function(req, res) {
+  let idrap = req.query.idrap;
+  let ngay = req.query.ngay;
+  let sqlquery = `SELECT phim.Hinh,suatchieu.ID as 'IdSuatChieu', suatchieu.Gio, phim.TenPhim, phim.ID from phim_phong_xuat JOIN suatchieu ON phim_phong_xuat.ID_XuatChieu = suatchieu.ID JOIN lichchieu on lichchieu.ID = suatchieu.ID_LichChieu JOIN rapphim on rapphim.ID = lichchieu.ID_Rap JOIN phim ON phim_phong_xuat.ID_Phim = phim.ID WHERE rapphim.ID = ${idrap} AND lichchieu.Ngay = '${ngay}' AND phim_phong_xuat.Ngay = '${ngay}'`;
+  conn.query(sqlquery, function(err, result) {
+    if (err) {
+      res.send(err);
+    } else {
+      let arrtemp = [];
+      let arrrs = [];
+      let namemovie = "";
+      if (result.length == 1) {
+        arrtemp.push({ idsuat: result[0].ID, gio: result[0].Gio });
+        arrrs.push(result[0]);
+        arrrs[0].suatchieu = arrtemp;
+      } else {
+        for (let i = 0; i < result.length; i++) {
+          let temp = result[i];
+          if (temp.TenPhim != namemovie) {
+            for (let j = i + 1; j < result.length; j++) {
+              if (temp.TenPhim == result[j].TenPhim) {
+                arrtemp.push({
+                  idsuat: result[j].IdSuatChieu,
+                  gio: result[j].Gio,
+                });
+              }
+            }
+            arrtemp.unshift({ idsuat: temp.IdSuatChieu, gio: temp.Gio });
+            temp.suatchieu = arrtemp.slice();
+            namemovie = temp.TenPhim;
+            arrrs.push(temp);
+            arrtemp.length = 0;
+          }
+        }
+      }
+      res.json(arrrs);
+    }
+  });
+});
+
+app.post("/xeplich", function(req, res) {
+  let idrapphim = req.body.idrapphim;
+  let ngay = req.body.ngay;
+  let gio = req.body.gio;
+  let idphong = req.body.idphong;
+  let idphim = req.body.idphim;
+  
+  let querylichchieu = `INSERT INTO lichchieu VALUES (NULL, '${ngay}', '${idrapphim}')`;
+  conn.query(querylichchieu, function(err, resultlichchieu) {
+    if (err) {
+      console.log(err);
+    } else {
+      let querysuatchieu = `INSERT INTO suatchieu VALUES (NULL, '${gio}', '${resultlichchieu.insertId}')`;
+      conn.query(querysuatchieu, function(err, reultsuatchieu) {
+        if (err) {
+          console.log(err);
+        } else {
+          let queryphonglichchieu = `INSERT INTO phong_lichchieu VALUES('${idphong}', '${resultlichchieu.insertId}')`;
+          conn.query(queryphonglichchieu, function(err, result) {
+            if (err) {
+              console.log(err);
+            } else {
+              let queryphimphongsuat = `INSERT INTO phim_phong_xuat VALUES('${idphim}','${idphong}','${reultsuatchieu.insertId}','${ngay}')`;
+              conn.query(queryphimphongsuat, function(err, result) {
+                if (err) {
+                  console.log(err);
+                } else {
+                  let queryphonglichchieu = `INSERT INTO phim_lichchieu VALUES('${idphong}','${resultlichchieu.insertId}')`;
+                  conn.query(queryphonglichchieu, function(err, result) {
+                    if (err) {
+                      console.log(err);
+                    } else {
+                      res.send("Thanh cong !");
+                    }
+                  });
+                }
+              });
+            }
+          });
+        }
+      });
+    }
+  });
+});
+//phong
+app.get("/loadphongadmin", function(req, res){
+  let sqlquery = `select * from phong`;
+  conn.query(sqlquery, function(err, results){
+    if(err){
+      console.log(err);
+    }else{
+      res.json(results);
+    }
+  })
+})
 //#endregion
 
 // LIMIT ${vitri},${soluong}
