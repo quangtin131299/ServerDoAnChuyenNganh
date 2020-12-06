@@ -15,7 +15,7 @@ const conn = mysql.createConnection({
   host: "db4free.net",
   user: "quang_tin",
   password: "Ngolamquangtin1@",
-  database: "datvephim",
+  database: "datvephim",  
   port: 3306,
 });
 
@@ -155,6 +155,7 @@ app.get("/datvephim", function(req, res) {
   let status = req.query.status;
   let idphong = req.query.idphong;
 
+
   let sqlqueryhoadon = `INSERT INTO hoadon  VALUES (NULL, '${ngaydat}', '45000', '${idkhachhang}', 'Chưa thanh toán');`;
 
   conn.query(sqlqueryhoadon, function(err, result) {
@@ -169,7 +170,7 @@ app.get("/datvephim", function(req, res) {
           if (err) {
             console.log(err);
           } else {
-            res.send("Đặt vé thành công!");
+            res.send(result.insertId);
           }
         });
 
@@ -177,11 +178,14 @@ app.get("/datvephim", function(req, res) {
         conn.query(sqlqueryghephong, function(err, result) {
           if (err) {
             console.log(err);
+          } else {
+            console.log("thành  công !");
           }
         });
       });
     }
   });
+
 });
 
 app.get("/loadxuatchieu", function(req, res) {
@@ -269,10 +273,8 @@ app.post("/capnhatthongtinkhach", function(req, res) {
 
 //Movie
 app.get("/loadphimadmin", function(req, res) {
-  let soluong = req.query.soluong;
   let vitri = req.query.vitri;
-
-  let query = `SELECT phim.ID, phim.TenPhim, phim.Hinh, phim.TrangThai, phim.ThoiGian, phim.Trailer, phim_loaiphim.MoTa, DATE_FORMAT(phim_loaiphim.NgayKhoiChieu, '%d/%m/%Y') as 'NgayKhoiChieu' FROM phim JOIN phim_loaiphim ON phim.ID = phim_loaiphim.ID_Phim`;
+  let query = `SELECT phim.ID, phim.TenPhim, phim.Hinh, phim.TrangThai, phim.ThoiGian, phim.Trailer, phim_loaiphim.MoTa, DATE_FORMAT(phim_loaiphim.NgayKhoiChieu, '%d/%m/%Y') as 'NgayKhoiChieu' FROM phim JOIN phim_loaiphim ON phim.ID = phim_loaiphim.ID_Phim Limit ${vitri}, 5`;
   conn.query(query, function(err, result) {
     if (err) {
       res.send(err);
@@ -387,7 +389,8 @@ app.post("/deletemovieadmin", function(req, res) {
 
 //Customer
 app.get("/loadcustomeradmin", function(req, res) {
-  let sqlquery = `SELECT khachhang.ID, khachhang.HoTen, khachhang.Email, DATE_FORMAT(khachhang.NgaySinh, '%d/%m/%Y') as 'NgaySinh', khachhang.SDT from khachhang`;
+  let vitri = req.query.vitri
+  let sqlquery = `SELECT khachhang.ID, khachhang.HoTen, khachhang.Email, DATE_FORMAT(khachhang.NgaySinh, '%d/%m/%Y') as 'NgaySinh', khachhang.SDT from khachhang Limit ${vitri}, 5`;
   conn.query(sqlquery, function(err, result) {
     if (err) {
       res.send(err);
@@ -410,7 +413,8 @@ app.get("/timkiemcustomer", function(req, res) {
 });
 //Cinema
 app.get("/loadcinemaadmin", function(req, res) {
-  let strquery = `SELECT * FROM rapphim`;
+  let vitri = req.query.vitri;
+  let strquery = `SELECT * FROM rapphim Limit ${vitri}, 5`;
   conn.query(strquery, function(err, result) {
     if (err) {
       res.send(err);
@@ -463,7 +467,8 @@ app.get("/timkiemcinemaadmin", function(req, res) {
 });
 //Ticker
 app.get("/loadtickeradmin", function(req, res) {
-  let sqlquery = `SELECT vedat.ID, vedat.NgayDat, DATE_FORMAT(suatchieu.Gio, '%H:%i') as 'Gio', ghe.TenGhe, phim.TenPhim, khachhang.HoTen, rapphim.TenRap, phong.TenPhong, vedat.Status FROM vedat JOIN suatchieu ON vedat.ID_Suat = suatchieu.ID JOIN ghe ON ghe.ID = vedat.ID_Ghe JOIN phim ON phim.ID = vedat.ID_Phim JOIN khachhang ON khachhang.ID = vedat.ID_KhachHang JOIN rapphim ON rapphim.ID = vedat.ID_Rap JOIN phong ON phong.ID = vedat.ID_Phong`;
+  let vitri = req.query.vitri;
+  let sqlquery = `SELECT vedat.ID, vedat.NgayDat, DATE_FORMAT(suatchieu.Gio, '%H:%i') as 'Gio', ghe.TenGhe, phim.TenPhim, khachhang.HoTen, rapphim.TenRap, phong.TenPhong, vedat.Status FROM vedat JOIN suatchieu ON vedat.ID_Suat = suatchieu.ID JOIN ghe ON ghe.ID = vedat.ID_Ghe JOIN phim ON phim.ID = vedat.ID_Phim JOIN khachhang ON khachhang.ID = vedat.ID_KhachHang JOIN rapphim ON rapphim.ID = vedat.ID_Rap JOIN phong ON phong.ID = vedat.ID_Phong Limit ${vitri}, 5`;
   conn.query(sqlquery, function(err, result) {
     if (err) {
       res.send(err);
@@ -473,8 +478,20 @@ app.get("/loadtickeradmin", function(req, res) {
   });
 });
 //Lich chieu
+app.get("/searchscheduleadmin", function(req, res) {
+  let ngay = req.query.ngay;
+  let query = `SELECT lichchieu.ID, DATE_FORMAT(lichchieu.Ngay, '%d/%m/%Y') as 'Ngay', rapphim.ID as 'IDRapPhim', rapphim.TenRap FROM lichchieu JOIN rapphim ON lichchieu.ID_Rap = rapphim.ID WHERE lichchieu.Ngay = '${ngay}'`;
+  conn.query(query, function(err, result) {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(result);
+    }
+  });
+});
 app.get("/loadlichchieuadmin", function(req, res) {
-  let sqlquery = `SELECT lichchieu.ID, DATE_FORMAT(lichchieu.Ngay, '%d/%m/%Y') as 'Ngay', rapphim.ID as 'IDRapPhim', rapphim.TenRap FROM lichchieu JOIN rapphim ON lichchieu.ID_Rap = rapphim.ID`;
+  let vitri = req.query.vitri;
+  let sqlquery = `SELECT lichchieu.ID, DATE_FORMAT(lichchieu.Ngay, '%d/%m/%Y') as 'Ngay', rapphim.ID as 'IDRapPhim', rapphim.TenRap FROM lichchieu JOIN rapphim ON lichchieu.ID_Rap = rapphim.ID Limit ${vitri}, 5`;
   conn.query(sqlquery, function(err, result) {
     if (err) {
       res.send(err);
@@ -529,7 +546,7 @@ app.post("/xeplich", function(req, res) {
   let gio = req.body.gio;
   let idphong = req.body.idphong;
   let idphim = req.body.idphim;
-  
+
   let querylichchieu = `INSERT INTO lichchieu VALUES (NULL, '${ngay}', '${idrapphim}')`;
   conn.query(querylichchieu, function(err, resultlichchieu) {
     if (err) {
@@ -568,16 +585,29 @@ app.post("/xeplich", function(req, res) {
   });
 });
 //phong
-app.get("/loadphongadmin", function(req, res){
+app.get("/loadphongadmin", function(req, res) {
   let sqlquery = `select * from phong`;
-  conn.query(sqlquery, function(err, results){
-    if(err){
+  conn.query(sqlquery, function(err, results) {
+    if (err) {
       console.log(err);
-    }else{
+    } else {
       res.json(results);
     }
-  })
-})
+  });
+});
+
+app.post("/loginadmin", function(req, res) {
+  let account = req.body.account;
+  let password = req.body.password;
+  let query = `SELECT Admin.ID, Admin.HoTen FROM Admin WHERE Admin.Acount = ? AND Admin.Password = ?`;
+  conn.query(query, [account, password], function(err, result) {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(result);
+    }
+  });
+});
 //#endregion
 
 // LIMIT ${vitri},${soluong}
