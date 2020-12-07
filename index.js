@@ -170,7 +170,7 @@ app.get("/datvephim", function(req, res) {
           if (err) {
             console.log(err);
           } else {
-            res.send(result.insertId);
+            res.json({idve:result.insertId, idhd: idhoadon});       
           }
         });
 
@@ -179,14 +179,44 @@ app.get("/datvephim", function(req, res) {
           if (err) {
             console.log(err);
           } else {
-            console.log("thành  công !");
+            console.log("thành công !");
           }
         });
       });
     }
   });
-
 });
+
+app.get('/capnhattrangthaidatve', function(req, res){
+  let idphong = req.query.idphong;
+  let idghe = req.query.idghe;
+  let ngaydat = req.query.ngaydat;
+  let idsuat = req.query.idsuat;
+  let idve = req.query.idve;
+  let idhoadon =  req.query.idhoadon;
+  let queryupdatestatusve = "UPDATE vedat SET vedat.Status = 'Đã hủy' WHERE vedat.ID = ?";
+  conn.query(queryupdatestatusve,[idve],function(err, result){
+      if(err){
+        console.log(err);
+      }else{
+        let queryupdatehd = "UPDATE hoadon SET hoadon.TrangThai = 'Đã hủy' WHERE hoadon.ID = ?";
+        conn.query(queryupdatehd, [idhoadon], function(err, result) {
+          if(err){
+            console.log(err);
+          }else{
+            let queryupdateghephong = "UPDATE ghe_phong SET ghe_phong.TrangThai = 'Đã hủy' WHERE ghe_phong.ID_Ghe = ? AND ghe_phong.ID_Phong = ? AND ghe_phong.ID_suatchieu = ? AND ghe_phong.NgayDat = ?";
+            conn.query(queryupdateghephong, [idghe, idphong, idsuat, ngaydat], function(err, result) {
+              if(err){
+                console.log(err);
+              }else{
+                res.send("ABC");
+              }
+            })
+          }
+        })
+      }
+  });
+})
 
 app.get("/loadxuatchieu", function(req, res) {
   let idphim = req.query.idphim;
@@ -608,6 +638,39 @@ app.post("/loginadmin", function(req, res) {
     }
   });
 });
+//Tạm
+app.get("/loadcinemascheduleadmin", function(req, res){
+  let strquery = `SELECT * FROM rapphim`;
+  conn.query(strquery, function(err, result) {
+    if (err) {
+      res.send(err);
+    } else {
+      res.json(result);
+    }
+  });
+})
+// load phong
+app.get("/loadphongscheduleadmin", function(req, res){
+  let sqlquery = `select * from phong`;
+  conn.query(sqlquery, function(err, results) {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(results);
+    }
+  });
+})
+// load phim
+app.get("/loadphimscheduleadmin", function(req, res){
+  let sqlquery = `select * from phim`;
+  conn.query(sqlquery, function(err, results) {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(results);
+    }
+  });
+})
 //#endregion
 
 // LIMIT ${vitri},${soluong}
