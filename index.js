@@ -134,11 +134,12 @@ app.get("/loadrapphim", function(req, res) {
 });
 
 app.get("/loadphimyeuthich", function(req, res) {
-  let sqlquery = `SELECT phim.ID,phim.TenPhim, phim.ThoiGian, phim.Hinh, phim_loaiphim.MoTa FROM phim JOIN phim_loaiphim ON phim.ID = phim_loaiphim.ID_Phim LIMIT 3`;
+  let sqlquery = `SELECT DISTINCT phim.ID,phim.TenPhim, phim.ThoiGian, phim.Hinh, phim_loaiphim.MoTa FROM phim JOIN phim_loaiphim ON phim.ID = phim_loaiphim.ID_Phim LIMIT 3`;
   conn.query(sqlquery, function(err, result) {
     if (err) {
       res.send(err);
     } else {
+    
       res.json(result);
     }
   });
