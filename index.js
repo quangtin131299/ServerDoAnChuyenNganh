@@ -298,6 +298,21 @@ app.post("/capnhatthongtinkhach", function(req, res) {
     }
   });
 });
+
+app.post('/updatepassuser', function(req,res){
+  let makhachhang = req.body.makhachhang;
+  let newpass = req.body.newpass;
+  let sqlquery = "UPDATE khachhang SET khachhang.Password = ? WHERE khachhang.ID = ?";
+  conn.query(sqlquery, [newpass, makhachhang], function(err, result){
+    if(err){
+      console.log(err);
+      res.json({status: "That Bai!"});
+    }else{
+      res.json({status: "Thanh Cong!"});
+    }
+  })
+});
+
 //#endregion
 
 //#region Phần Server
