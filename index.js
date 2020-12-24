@@ -28,11 +28,7 @@ app.post("/login", function(req, res) {
     if (err) {
       res.send(err);
     } else {
-      if (result) {
-        res.json(result);
-      } else {
-        res.send("fail");
-      }
+      res.json(result);
     }
   });
 });
@@ -249,12 +245,15 @@ app.get("/loadve", function(req, res) {
   });
 });
 
-app.get("/loadghe", function(req, res) {
-  let rapphim = req.query.rapphim;
-  let idphim = req.query.idphim;
-  let suatchieu = req.query.suatchieu;
-  let ngaydathientai = req.query.ngaydathientai;
-
+app.put("/loadghe", function(req, res) {
+  // let rapphim = req.query.rapphim;
+  // let idphim = req.query.idphim;
+  // let suatchieu = req.query.suatchieu;
+  // let ngaydathientai = req.query.ngaydathientai;
+  let rapphim = req.body.rapphim;
+  let idphim = req.body.idphim;
+  let suatchieu = req.body.suatchieu;
+  let ngaydathientai = req.body.ngaydathientai;
   let sqlquery = `SELECT ghe.ID, phim.TenPhim, ghe.TenGhe, ghe_phong.TrangThai FROM ghe JOIN ghe_phong ON ghe.ID = ghe_phong.ID_Ghe JOIN phong ON phong.ID = ghe_phong.ID_Phong JOIN suatchieu ON suatchieu.ID = ghe_phong.ID_suatchieu JOIN phong_rap ON phong_rap.ID_Phong = phong.ID JOIN rapphim ON rapphim.ID = phong_rap.ID_Rap JOIN phim_phong_xuat ON phim_phong_xuat.ID_XuatChieu = suatchieu.ID JOIN phim ON phim.ID = phim_phong_xuat.ID_Phim JOIN lichchieu ON lichchieu.ID_Rap = rapphim.ID WHERE phim.ID = ${idphim} AND suatchieu.Gio = '${suatchieu}' AND rapphim.ID = ${rapphim} AND ghe_phong.NgayDat ='${ngaydathientai}' AND lichchieu.Ngay = '${ngaydathientai}'`;
 
   conn.query(sqlquery, function(err, result) {
