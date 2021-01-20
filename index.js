@@ -10,10 +10,10 @@ app.use(express.json()); // for parsing application/json
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencode
 
 const conn = mysql.createConnection({
-  host: "db4free.net",
-  user: "quang_tin",
-  password: "Ngolamquangtin1@",
-  database: "datvephim",
+  host: "bgcs6lfujsw9xwszjqhj-mysql.services.clever-cloud.com",
+  user: "ueogosnzkiuwtl5z",
+  password: "ylaJ3jVOQ9oey9k25vF8",
+  database: "bgcs6lfujsw9xwszjqhj",
   port: 3306,
 });
 
