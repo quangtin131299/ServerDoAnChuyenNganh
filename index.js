@@ -10,10 +10,10 @@ app.use(express.json()); // for parsing application/json
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencode
 
 const conn = mysql.createConnection({
-  host: "bgcs6lfujsw9xwszjqhj-mysql.services.clever-cloud.com",
-  user: "ueogosnzkiuwtl5z",
-  password: "ylaJ3jVOQ9oey9k25vF8",
-  database: "bgcs6lfujsw9xwszjqhj",
+  host: "db4free.net",
+  user: "quang_tin",
+  password: "Ngolamquangtin1@",
+  database: "datvephim",  
   port: 3306,
 });
 
@@ -182,26 +182,27 @@ app.get("/datvephim", function (req, res) {
           if (err) {
             console.log(err);
           } else {
-            if (result1[0]) {
-              let updatestatus =
-                "UPDATE ghe_phong SET ghe_phong.TrangThai = 'Đã đặt' WHERE ghe_phong.ID_Ghe = ? AND ghe_phong.ID_Phong = ? AND ghe_phong.ID_suatchieu = ? AND ghe_phong.NgayDat = ?";
-              conn.query(updatestatus, [idghe, idphong, idsuat, ngaydat], function (err, resultupdatestatus) {
-                if (err) {
-                  console.log(err);
-                } else {
-                  // console.log("thành công !");
-                }
-              });
-            } else {
-              let sqlqueryghephong = `INSERT INTO ghe_phong VALUES ('${idghe}', '${idphong}','${idsuat}','${status}' ,'${ngaydat}')`;
+            // if (result1[0]) {
+            //   let updatestatus =
+            //     "UPDATE ghe_phong SET ghe_phong.TrangThai = 'Đã đặt' WHERE ghe_phong.ID_Ghe = ? AND ghe_phong.ID_Phong = ? AND ghe_phong.ID_suatchieu = ? AND ghe_phong.NgayDat = ?";
+            //   conn.query(updatestatus, [idghe, idphong, idsuat, ngaydat], function (err, resultupdatestatus) {
+            //     if (err) {
+            //       console.log(err);
+            //     } else {
+            //       // console.log("thành công !");
+            //     }
+            //   });
+            // } else {
+              // let sqlqueryghephong = `INSERT INTO ghe_phong VALUES ('${idghe}', '${idphong}','${idsuat}','${status}' ,'${ngaydat}')`;
+              let sqlqueryghephong = `UPDATE ghe set ghe.TrangThai = N'Đã đặt' WHERE ghe.ID = ${idghe}`;
               conn.query(sqlqueryghephong, function (err, result) {
                 if (err) {
                   console.log(err);
                 } else {
-                  // console.log("thành công !");
+                  console.log("thành công !");
                 }
               });
-            }
+            // }
           }
         });
       });
@@ -229,10 +230,9 @@ app.get("/capnhattrangthaidatve", function (req, res) {
           console.log(err);
         } else {
           let queryupdateghephong =
-            "UPDATE ghe_phong SET ghe_phong.TrangThai = 'Đã hủy' WHERE ghe_phong.ID_Ghe = ? AND ghe_phong.ID_Phong = ? AND ghe_phong.ID_suatchieu = ? AND ghe_phong.NgayDat = ?";
+            `UPDATE ghe set ghe.TrangThai = N'Đã đặt' WHERE ghe.ID = ${idghe}`;
           conn.query(
             queryupdateghephong,
-            [idghe, idphong, idsuat, ngaydat],
             function (err, result) {
               if (err) {
                 console.log(err);
@@ -263,10 +263,12 @@ app.get("/loadxuatchieu", function (req, res) {
 });
 
 app.get("/loadve", function (req, res) {
+  let thoigianhientai =  req.query.thoigianhientai;
+  let ngayhientai = req.query.ngayhientai;
   let iduser = req.query.iduser;
   let sqlquery = `SELECT phong.TenPhong, vedat.Status, rapphim.DiaChi, phim.Hinh, phim.ThoiGian, vedat.ID, rapphim.TenRap, phim.TenPhim , DATE_FORMAT(vedat.NgayDat, '%d/%m/%Y') as NgayDat, ghe.TenGhe, suatchieu.Gio
-  FROM vedat JOIN phim ON phim.ID = vedat.ID_Phim JOIN suatchieu ON suatchieu.ID = vedat.ID_Suat JOIN ghe on ghe.ID = vedat.ID_Ghe JOIN khachhang ON khachhang.ID = vedat.ID_KhachHang JOIN  rapphim ON rapphim.ID = vedat.ID_Rap JOIN phong ON phong.ID = vedat.ID_Phong
-  WHERE vedat.Status = N'Đã đặt' AND khachhang.ID = ${iduser}`;
+              FROM vedat JOIN phim ON phim.ID = vedat.ID_Phim JOIN suatchieu ON suatchieu.ID = vedat.ID_Suat JOIN ghe on ghe.ID = vedat.ID_Ghe JOIN khachhang ON khachhang.ID = vedat.ID_KhachHang JOIN  rapphim ON rapphim.ID = vedat.ID_Rap JOIN phong ON phong.ID = vedat.ID_Phong
+              WHERE suatchieu.Gio >= '${thoigianhientai}' AND vedat.NgayDat >=  DATE('${ngayhientai}') AND vedat.Status = N'Đã đặt' AND khachhang.ID = ${iduser}`;
 
   conn.query(sqlquery, function (err, result) {
     if (err) {
@@ -277,6 +279,18 @@ app.get("/loadve", function (req, res) {
   });
 });
 
+app.get("/loadallghe", function(req, res){
+  let idphong = req.query.idphong;
+  let sqlquery = `SELECT * FROM ghe WHERE ghe.ID_Phong = ?`;
+  conn.query(sqlquery,[idphong],function(err , result){
+    if(err){
+      console.log(err);
+    }else{
+      res.json(result);
+    }
+  })
+})
+
 app.put("/loadghe", function (req, res) {
   // let rapphim = req.query.rapphim;
   // let idphim = req.query.idphim;
@@ -284,10 +298,19 @@ app.put("/loadghe", function (req, res) {
   // let ngaydathientai = req.query.ngaydathientai;
   let rapphim = req.body.rapphim;
   let idphim = req.body.idphim;
-  let suatchieu = req.body.suatchieu;
+  let idsuatchieu = req.body.idsuatchieu;
   let ngaydathientai = req.body.ngaydathientai;
-  let sqlquery = `SELECT ghe.ID, phim.TenPhim, ghe.TenGhe, ghe_phong.TrangThai FROM ghe JOIN ghe_phong ON ghe.ID = ghe_phong.ID_Ghe JOIN phong ON phong.ID = ghe_phong.ID_Phong JOIN suatchieu ON suatchieu.ID = ghe_phong.ID_suatchieu JOIN phong_rap ON phong_rap.ID_Phong = phong.ID JOIN rapphim ON rapphim.ID = phong_rap.ID_Rap JOIN phim_phong_xuat ON phim_phong_xuat.ID_XuatChieu = suatchieu.ID JOIN phim ON phim.ID = phim_phong_xuat.ID_Phim JOIN lichchieu ON lichchieu.ID_Rap = rapphim.ID WHERE phim.ID = ${idphim} AND suatchieu.Gio = '${suatchieu}' AND rapphim.ID = ${rapphim} AND ghe_phong.NgayDat ='${ngaydathientai}' AND lichchieu.Ngay = '${ngaydathientai}'`;
-
+  let idphong = req.body.idphong;
+  // let sqlquery = `SELECT ghe.ID, phim.TenPhim, ghe.TenGhe, ghe_phong.TrangThai 
+  //                 FROM ghe JOIN ghe_phong ON ghe.ID = ghe_phong.ID_Ghe JOIN phong ON phong.ID = ghe_phong.ID_Phong JOIN suatchieu ON suatchieu.ID = ghe_phong.ID_suatchieu JOIN phong_rap ON phong_rap.ID_Phong = phong.ID JOIN rapphim ON rapphim.ID = phong_rap.ID_Rap JOIN phim_phong_xuat ON phim_phong_xuat.ID_XuatChieu = suatchieu.ID JOIN phim ON phim.ID = phim_phong_xuat.ID_Phim JOIN lichchieu ON lichchieu.ID_Rap = rapphim.ID 
+  //                 WHERE phim.ID = ${idphim} AND suatchieu.ID = '${suatchieu}' AND rapphim.ID = ${rapphim} AND ghe_phong.NgayDat ='${ngaydathientai}' AND lichchieu.Ngay = '${ngaydathientai}'`;
+  // let sqlquery = `SELECT ghe.ID, phim.TenPhim, ghe.TenGhe, ghe.TrangThai 
+  //           FROM ghe JOIN phong on phong.ID = ghe.ID_Phong JOIN rapphim ON phong.ID_Rap = rapphim.ID JOIN phim_phong_xuat on phim_phong_xuat.ID_Phong = phong.ID JOIN phim on phim_phong_xuat.ID_Phim = phim.ID JOIN suatchieu ON suatchieu.ID = phim_phong_xuat.ID_XuatChieu JOIN phong_lichchieu on phong_lichchieu.ID_Phong = phong.ID JOIN
+  //           lichchieu ON lichchieu.ID = phong_lichchieu.ID_LichChieu
+  //           WHERE phim.ID = ${idphim} AND suatchieu.ID = ${idsuatchieu} AND rapphim.ID = ${rapphim} AND lichchieu.Ngay = '${ngaydathientai}' AND phong.ID = ${idphong} AND ghe.TrangThai = N'Đã đặt'`
+  let sqlquery = `SELECT ghe.ID, phim.TenPhim, ghe.TenGhe, ghe.TrangThai 
+                  FROM lichchieu JOIN rapphim ON lichchieu.ID_Rap = rapphim.ID JOIN phong ON phong.ID_Rap = rapphim.ID JOIN ghe ON ghe.ID_Phong = phong.ID JOIN phim_phong_xuat ON phim_phong_xuat.ID_Phong = phong.ID JOIN phim ON phim_phong_xuat.ID_Phim = phim.ID JOIN suatchieu ON phim_phong_xuat.ID_XuatChieu = suatchieu.ID 
+                  WHERE phim.ID = ${idphim} AND suatchieu.ID = ${idsuatchieu} AND rapphim.ID = ${rapphim} AND lichchieu.Ngay = '${ngaydathientai}' AND phong.ID = ${idphong} AND ghe.TrangThai = N'Đã đặt'`
   conn.query(sqlquery, function (err, result) {
     if (err) {
       res.send(err);
@@ -298,12 +321,16 @@ app.put("/loadghe", function (req, res) {
 });
 
 app.get("/loadphong", function (req, res) {
-  let suatchieu = req.query.suatchieu;
+  let idsuatchieu = req.query.suatchieu;
   let idphim = req.query.idphim;
   let idrap = req.query.idrap;
   let ngayhientai = req.query.ngayhientai;
-  let sqlquery = `SELECT suatchieu.Gio,phong.ID,phong.TenPhong FROM phong JOIN phong_rap ON phong.ID = phong_rap.ID_Phong JOIN rapphim ON rapphim.ID = phong_rap.ID_Rap JOIN phong_lichchieu ON phong_lichchieu.ID_Phong = phong.ID JOIN lichchieu ON lichchieu.ID = phong_lichchieu.ID_LichChieu JOIN phim_phong_xuat ON phim_phong_xuat.ID_Phong = phong.ID JOIN suatchieu ON suatchieu.ID = phim_phong_xuat.ID_XuatChieu WHERE lichchieu.Ngay = '${ngayhientai}' AND rapphim.ID = ${idrap} AND phim_phong_xuat.ID_Phim = ${idphim} AND suatchieu.Gio = '${suatchieu}'`;
-
+  // let sqlquery = `SELECT suatchieu.Gio,phong.ID,phong.TenPhong 
+  //                 FROM phong JOIN rapphim on phong.ID_Rap = rapphim.ID JOIN phim_phong_xuat ON phim_phong_xuat.ID_Phong = phong.ID JOIN phong_lichchieu on phong.ID = phong_lichchieu.ID_Phong JOIN lichchieu ON lichchieu.ID = phong_lichchieu.ID_LichChieu JOIN suatchieu ON phim_phong_xuat.ID_XuatChieu = suatchieu.ID 
+  //                 WHERE lichchieu.Ngay = '${ngayhientai}' AND rapphim.ID = ${idrap} AND phim_phong_xuat.ID_Phim = ${idphim} AND suatchieu.ID = ${idsuatchieu}`
+  let sqlquery = `SELECT suatchieu.Gio,phong.ID,phong.TenPhong 
+                  FROM lichchieu JOIN rapphim ON lichchieu.ID_Rap = rapphim.ID JOIN phong on phong.ID_Rap = rapphim.ID JOIN phim_phong_xuat ON phim_phong_xuat.ID_Phong = phong.ID JOIN phim ON phim_phong_xuat.ID_Phim = phim.ID JOIN suatchieu ON phim_phong_xuat.ID_XuatChieu = suatchieu.ID 
+                  WHERE lichchieu.Ngay = '${ngayhientai}' AND rapphim.ID = ${idrap} AND phim_phong_xuat.ID_Phim = ${idphim} AND suatchieu.ID = ${idsuatchieu}`;
   conn.query(sqlquery, function (err, result) {
     if (err) {
       res.send(err);
@@ -314,18 +341,28 @@ app.get("/loadphong", function (req, res) {
 });
 
 app.post("/capnhatthongtinkhach", function (req, res) {
-  let hoten = req.body.hoten;
-  let email = req.body.email;
-  let ngaysinh = req.body.ngaysinh;
-  let sodienthoai = req.body.sodienthoai;
-  let idkhachhang = req.body.idkhachhang;
-  let sqlquery = `UPDATE khachhang SET khachhang.HoTen = '${hoten}' , khachhang.Email = '${email}', khachhang.NgaySinh = '${ngaysinh}', khachhang.SDT = '${sodienthoai}' WHERE khachhang.ID = ${idkhachhang}`;
+  let hoten = req.body.HoTen;
+  let email = req.body.Email;
+  let ngaysinh = req.body.NgaySinh;
+  let sodienthoai = req.body.SDT;
+  let idkhachhang = req.body.ID;
+  let sqlquery = `UPDATE khachhang 
+                  SET khachhang.HoTen = ? , khachhang.Email = ?, khachhang.NgaySinh = ?, khachhang.SDT = ? 
+                  WHERE khachhang.ID = ?`;
 
-  conn.query(sqlquery, function (err, result) {
+  conn.query(sqlquery, [hoten, email, ngaysinh, sodienthoai, idkhachhang] ,function (err, result) {
     if (err) {
       res.send(err);
     } else {
-      res.send("Cập nhật thành công");
+      res.send({
+        ID: result.insertId,
+        HoTen: hoten,
+        Email: email,
+        NgaySinh: ngaysinh,
+        SDT: sodienthoai,
+        Account: '',
+        Password: '',
+      });
     }
   });
 });
@@ -338,9 +375,17 @@ app.post("/updatepassuser", function (req, res) {
   conn.query(sqlquery, [newpass, makhachhang], function (err, result) {
     if (err) {
       console.log(err);
-      res.json({ status: "That Bai!" });
+      // res.json({ status: "That Bai!" });
     } else {
-      res.json({ status: "Thanh Cong!" });
+      res.json({
+        ID: result.insertId,
+        HoTen: '',
+        Email: '',
+        NgaySinh: '',
+        SDT: '',
+        Account: '',
+        Password: '',
+      });
     }
   });
 });
